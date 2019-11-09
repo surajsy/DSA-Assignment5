@@ -4,22 +4,22 @@
 
 int main()
 {
-	int *num;
-	float *frac;
+	int *num, *num2;
+	float *frac, *frac2;
 
-	num = (int*)spheap(sizeof(int));
+	num = (int*)spheap(10*sizeof(int));
 	printf("\n");
-	*num = 25;
-	frac = (float*)spheap(sizeof(float));
+//	*num = 25;
+	frac = (float*)spheap(5*sizeof(float));
 	printf("\n");
-	*frac = 0.234;
+///	*frac = 0.234;
 
-	if(num!=NULL) printf("%d\n", *num);
-	if(frac!=NULL) printf("%f\n", *frac);
 
-	freeSpheap(num);
-	printf("\n");
+//	if(num!=NULL) printf("%d\n", *num);
+//	if(frac!=NULL) printf("%f\n", *frac);
 	freeSpheap(frac);
+	printf("\n");
+	freeSpheap(num);
 	printf("\n");
 	return 0;
 }
