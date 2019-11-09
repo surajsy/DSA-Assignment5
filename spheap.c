@@ -41,7 +41,7 @@ ASL* split(ASL *slot, size_t size){
 		return NULL;
 
 	if(size % (slot->size/2) != size){
-		printf("%ld %ld\n", size,slot->size);
+//		printf("%ld %ld\n", size,slot->size);
 		return slot;
 	}
 
@@ -88,7 +88,7 @@ void* spheap(size_t bytes){
 	if(!init){
 		initialize();
 		init = 1;
-		printf("memory initialized\n");
+//		printf("memory initialized\n");
 	}
 
 	current = freeList;
@@ -100,8 +100,8 @@ void* spheap(size_t bytes){
 
 	if(current != NULL){
 		current->TAG = !FREE;
-		printf("memory allocated\n");
-		printf("KVAL = %d TYPE = %d\n", current->KVAL, current->TYPE);
+//		printf("memory allocated\n");
+//		printf("KVAL = %d TYPE = %d\n", current->KVAL, current->TYPE);
 		return current->memory;
 	}
 
@@ -119,6 +119,7 @@ void merge(ASL *node){
 	int type;
 	ASL* temp;
 	int count1,count2,count3;
+	unsigned long int min;
 
 	if(node->KVAL == KMAX){
 		node->TAG = FREE;
@@ -147,52 +148,30 @@ void merge(ASL *node){
 	}
 
 	temp = freeList;
-	while(temp!=NULL){
-		printf("%d ", temp->KVAL);
+/*	while(temp!=NULL){
+		printf("(%d,%d) ", temp->KVAL,temp->TYPE);
 		temp = temp->next;
 	}
-	printf("\n");
+	printf("\n");*/
 
 	if(node->TYPE == TYPE3){
 		K = node->KVAL + 2;
-		pBud1 = buddy + POW2K(K);
-		pBud2 = buddy - POW2K(K+1);
-		pBud3 = buddy - 3*POW2K(K);
 
-		parent1 = node->next;
-		count1 = 0;
-		while(parent1!=NULL && parent1->memory!= pBud1){
-			parent1 = parent1->next;
-			count1++;
-		}
+		if(buddy < node->memory)
+			min = (unsigned long int)buddy - (unsigned long int)memory;
+		else
+			min = (unsigned long int)node->memory - (unsigned long int)memory;
 
-		parent2 = node->prev;
-		count2 = 0;
-		while(parent2!=NULL && parent2->memory!= pBud2){
-			parent2 = parent2->prev;
-			count2++;
-		}
+		mod = min % POW2K(K+2);
 
-		parent3 = node->prev;
-		count3 = 0;
-		while(parent3!=NULL && parent3->memory!= pBud3){
-			parent3 = parent3->prev;
-			count3++;
-		}
-
-		if(parent1!=NULL && count1 != 0){
+		if(mod == 0)
 			type = TYPE1;
-			printf("type = %d count1 = %d\n", type,count1);
-		}
-		else if(parent2!=NULL && count2 != 0){
+		else if(mod == 2*POW2K(K))
 			type = TYPE2;
-			printf("type = %d count2 = %d\n", type,count2);
-		}
-		else if(parent3!=NULL && count3 != 0){
+		else if(mod == 3*POW2K(K))
 			type = TYPE3;
-			printf("type = %d count3 = %d\n", type,count3);
-		}
-		else type = TYPE3;
+		else
+			printf("something terribly wrong with logic\n");
 
 	}
 	else if(node->TYPE == TYPE2){
@@ -206,7 +185,7 @@ void merge(ASL *node){
 
 
 	if(node->next != NULL && node->next->memory == buddy){
-		if(node->next->TAG == FREE){
+		if(node->next->TAG == FREE && (node->KVAL == node->next->KVAL || node->KVAL == node->next->KVAL + 1)){
 			//Find K!!!
 
 			new = createAslNode(K,type,POW2K(K));
@@ -234,7 +213,7 @@ void merge(ASL *node){
 		}
 	}
 	else if(node->prev != NULL && node->prev->memory == buddy){
-		if(node->prev->TAG == FREE){
+		if(node->prev->TAG == FREE && (node->KVAL == node->prev->KVAL || node->KVAL == node->prev->KVAL - 1)){
 			//Find K!!!
 
 			new = createAslNode(K,type,POW2K(K));
