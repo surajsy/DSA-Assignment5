@@ -37,7 +37,6 @@ ASL* split(ASL *slot, size_t size){
 	int K = slot->KVAL;
 	int type = slot->TYPE;
 
-//	printf("%d ", K);
 	if(slot->size < size)
 		return NULL;
 
@@ -49,14 +48,12 @@ ASL* split(ASL *slot, size_t size){
 		new2 = createAslNode(K,TYPE2,POW2K(K));
 		new1->memory = slot->memory;
 		new2->memory = slot->memory + POW2K(K+1);
-//		printf("if part\n");
 	}
 	else{
 		new1 = createAslNode(K-2 , TYPE3 , 3*POW2K(K-2));
 		new2 = createAslNode(K-2 , TYPE3 , POW2K(K-2));
 		new1->memory = slot->memory;
 		new2->memory = slot->memory + 3*POW2K(K-2);
-//		printf("else part\n");
 	}
 
 	new1->next = new2;
@@ -84,7 +81,6 @@ ASL* split(ASL *slot, size_t size){
 
 void* spheap(size_t bytes){
 	ASL *current,*prev;
-	ASL *temp;
 	void *block;
 
 	if(!init){
@@ -99,19 +95,10 @@ void* spheap(size_t bytes){
 	}
 
 	current = split(current,bytes);
-	printf("\n");
-	temp = freeList;
-
-	while(temp!=NULL){
-		printf("%d ", temp->TYPE);
-		temp = temp->next;
-	}
-	printf("\n");
 
 	if(current != NULL){
 		current->TAG = !FREE;
 		printf("memory allocated\n");
-		printf("current->KVAL = %d, current->TYPE = %d, current->size = %ld\n", current->KVAL,current->TYPE,current->size);
 		return current->memory;
 	}
 
@@ -148,7 +135,6 @@ void merge(ASL *node){
 		case TYPE3:
 			if(mod == 0){
 				buddy = node->memory + 3*POW2K(node->KVAL);
-				printf("if\n");
 			}
 			else if(mod == 3*POW2K(node->KVAL)){
 				buddy = node->memory - 3*POW2K(node->KVAL);
@@ -163,14 +149,16 @@ void merge(ASL *node){
 	}
 	printf("\n");
 
+	if(node->TYPE == TYPE3)
+		K = node->KVAL + 2;
+	else if(node->TYPE == TYPE2)
+		K = node->KVAL;
+	else if(node->TYPE == TYPE1)
+		K = node->KVAL - 1;
+
 	if(node->next != NULL && node->next->memory == buddy){
-		printf("if part\n");
 		if(node->next->TAG == FREE){
 			//Find K!!!
-			if(node->TYPE == TYPE3)
-				K = node->KVAL + 2;
-			else if(node->TYPE == TYPE1)
-				K = node->KVAL - 1;
 
 			new = createAslNode(K,TYPE3,POW2K(K));
 			new->memory = node->memory;
@@ -197,13 +185,8 @@ void merge(ASL *node){
 		}
 	}
 	else if(node->prev != NULL && node->prev->memory == buddy){
-//		printf("else part\n");
 		if(node->prev->TAG == FREE){
 			//Find K!!!
-			if(node->TYPE == TYPE3)
-				K = node->KVAL + 2;
-			else if(node->TYPE == TYPE2)
-				K = node->KVAL;
 
 			new = createAslNode(K,TYPE3,POW2K(K));
 			new->memory = node->prev->memory;
@@ -242,14 +225,6 @@ void freeSpheap(void *block){
 	while(current->memory != block){
 		current = current->next;
 	}
-
-	if(current->prev !=NULL) printf("%d<-", current->prev->KVAL);
-	else printf("NULL<-");
-
-	printf("%d",current->KVAL);
-
-	if(current->next != NULL) printf("->%d\n", current->next->KVAL);
-	else printf("->NULL\n");
 
 	merge(current);
 	temp = freeList;
